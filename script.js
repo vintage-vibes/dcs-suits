@@ -43,10 +43,11 @@ let autoSlide = setInterval(() => {
 
 
 // product-container
-let position = 0;
+let  currentindex = 0;
+
 let visibleProducts ;
-let productWidth ;
-let maxScroll;
+let productWidth = 0 ;
+let maxIndex = 0;
 
     const container = document.querySelector(".products-container");
     const products = document.querySelectorAll('.product');
@@ -62,48 +63,67 @@ function calculateSlider() {
 
     productWidth = products[0].offsetWidth + gap;
             
-    visibleProducts = Math.floor(container.offsetWidth / productWidth);
+    visibleProducts = Math.floor(container.parentElement.offsetWidth / productWidth);
 
-    maxScroll =(products.length - visibleProducts) * productWidth
+    maxIndex = products.length - visibleProducts;
+
+    if (maxIndex < 0) maxIndex = 0;
+
+
+}
+
+
+function moveSlider() {
+    const position = -(currentindex * productWidth);
+    container.style.transform = `translateX(${position}px)`;
+
+    updatebuttons();
 }
 
 
 function updatebuttons(){
       // disable prev at start
-    prev.disabled = position === 0;
+    prev.disabled = currentindex === 0;
 
     // disable next at end
-    next.disabled = Math.abs(position) >= maxScroll;
+    next.disabled = currentindex >= maxIndex;
 }
 
 
 next.addEventListener("click",()=>{
-    if (Math.abs(position) < maxScroll) {
-        position -= productWidth;
-        container.style.transform = `translateX(${position}px)`;
-        updatebuttons();
+    if (currentindex < maxIndex) {
+        currentindex++;
+        moveSlider();
     }
 });
 
 
 prev.addEventListener('click', () => {
-   if (position < 0) {
-        position += productWidth;
-        container.style.transform = `translateX(${position}px)`;
-        updatebuttons();
+    prev.addEventListener("click", () => {
+    if (currentindex > 0) {
+        currentindex--;
+        moveSlider();
     }
+});
 });
 
 window.addEventListener("resize", () => {
     calculateSlider();
-    position = 0; // reset position
-    container.style.transform = `translateX(0px)`;
+    currentindex = 0;
+    moveSlider();
 
-    updatebuttons();
+    
 });
 
+
 calculateSlider();
-updatebuttons();
+moveSlider();
+
+
+
+
+
+
 
 
 // mobile nav
