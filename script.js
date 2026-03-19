@@ -1,146 +1,114 @@
-const track = document.querySelectorAll('.product-container');
-const next = document.querySelector('.next');
-const prev = document.querySelector('.prev');
+const slider = document.querySelector('.service-container');
 
-const test_track = document.querySelector(".testimonial-track");
-const slides = document.querySelectorAll(".testimonial-container");
-const nextBtn = document.querySelector(".test-next");
-const prevBtn = document.querySelector(".test-prev");
-const slider = document.querySelector(".testimonial-slider");
+let isDown = false;
+let startX =0;
+let scrollLeft =0;
+let velocity = 0;
+let rafId = null;
+
+function startDrag(e) {
+    isDown = true;
+    slider.classList.add('active');           // visual feedback (cursor: grabbing usually)
+    
+    // Support both mouse and touch
+    const pageX = e.pageX || e.touches?.[0]?.pageX;
+    startX = pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+
+    // Cancel any ongoing momentum
+    cancelAnimationFrame(rafId);
+    velocity = 0;
+}
+function stopDrag() {
+    if (!isDown) return;
+    isDown = false;
+    slider.classList.remove('active');
+
+    // Optional: add a little momentum/inertia
+    // (uncomment if you want smooth flick feel)
+    // if (Math.abs(velocity) > 0.5) {
+    //     function momentum() {
+    //         slider.scrollLeft -= velocity;
+    //         velocity *= 0.95; // friction
+    //         if (Math.abs(velocity) > 0.5) {
+    //             rafId = requestAnimationFrame(momentum);
+    //         }
+    //     }
+    //     rafId = requestAnimationFrame(momentum);
+    // }
+}
+
+function drag(e) {
+    if (!isDown) return;
+    const pageX = e.pageX || e.touches?.[0]?.pageX;
+    const pageY = e.pageY || e.touches?.[0]?.pageY;
+
+    const x = pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.8;
+
+    // Only prevent default if horizontal movement is bigger than vertical
+    const moveX = Math.abs(pageX - startX);
+    const moveY = Math.abs(pageY - startX);
+
+    if (moveX > moveY) {
+        e.preventDefault(); // only block when dragging sideways
+        slider.scrollLeft = scrollLeft - walk;
+    }
+}
 
 
-let index = 0 ;
-const totalSlides = slides.length
 
-const showSlide = (i) =>{
-    slides.forEach(slide =>{
-        slide.classList.remove("active");
+slider.addEventListener('mousedown', startDrag);
+slider.addEventListener('mousemove', drag);
+slider.addEventListener('mouseup', stopDrag);
+slider.addEventListener('mouseleave', stopDrag);
+
+// Touch events (very important for mobile)
+slider.addEventListener('touchstart', startDrag, { passive: false });
+slider.addEventListener('touchmove', drag, { passive: false });
+slider.addEventListener('touchend', stopDrag);
+slider.addEventListener('touchcancel', stopDrag);
+
+
+
+
+const tabs = document.querySelectorAll('.tab');
+const sections = document.querySelectorAll('.pricing-section');
+
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+
+        // remove active from all
+        tabs.forEach(t => t.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+
+        // activate clicked
+        tab.classList.add('active');
+        sections[tab.dataset.tab].classList.add('active');
     });
-    
-    slides[i].classList.add("active");
-}
-
-
-nextBtn.addEventListener("click", () => {
-    index++;
-    if(index >= totalSlides) index = 0;
-    showSlide(index);
-});
-
-prevBtn.addEventListener("click", () => {
-    index--;
-    if(index < 0) index = totalSlides - 1;
-    showSlide(index);
-});
-
-let autoSlide = setInterval(() => {
-    index++;
-    if(index >= totalSlides) index = 0;
-    showSlide(index);
-}, 5000);
-
-
-
-
-// product-container
-let  currentindex = 0;
-
-let visibleProducts ;
-let productWidth = 0 ;
-let maxIndex = 0;
-
-    const container = document.querySelector(".products-container");
-    const products = document.querySelectorAll('.product');
-
-function calculateSlider() {  
-    
-
-    if (!products.length) return;
-
-    const style = window.getComputedStyle(products[0]);
-    const gap = parseInt(style.marginRight) || 0;
-
-
-    productWidth = products[0].offsetWidth + gap;
-            
-    visibleProducts = Math.floor(container.parentElement.offsetWidth / productWidth);
-
-    maxIndex = products.length - visibleProducts;
-
-    if (maxIndex < 0) maxIndex = 0;
-
-
-}
-
-
-function moveSlider() {
-    const position = -(currentindex * productWidth);
-    container.style.transform = `translateX(${position}px)`;
-
-    updatebuttons();
-}
-
-
-function updatebuttons(){
-      // disable prev at start
-    prev.disabled = currentindex === 0;
-
-    // disable next at end
-    next.disabled = currentindex >= maxIndex;
-}
-
-
-next.addEventListener("click",()=>{
-    if (currentindex < maxIndex) {
-        currentindex++;
-        moveSlider();
-    }
 });
 
 
-prev.addEventListener('click', () => {
-    prev.addEventListener("click", () => {
-    if (currentindex > 0) {
-        currentindex--;
-        moveSlider();
-    }
+ const burger = document.querySelector('.burger-menu');
+ const mobile = document.getElementById('mobile-links');
+ const navLinks = document.querySelectorAll('.mobile-nav .nav-links a');
+ const navMenu = document.querySelector('.mobile-nav .nav-links');
+
+ burger.addEventListener('click',()=>{
+    burger.classList.toggle('active');
+    mobile.classList.toggle('active');
+ })
+
+
+ navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        navMenu.classList.remove('active'); // close menu
+        burger.classList.remove('active');  // reset burger icon
+    });
 });
-});
 
-window.addEventListener("resize", () => {
-    calculateSlider();
-    currentindex = 0;
-    moveSlider();
-
-    
-});
-
-
-calculateSlider();
-moveSlider();
-
-
-
-
-
-
-
-
-// mobile nav
-
-const burger = document.querySelector('.burger-menu');
-const tab = document.querySelector('.mobile');
-const navlinks = document.querySelectorAll('.mobile-links a')
-
-burger.addEventListener("click" ,() =>{
-    burger.classList.toggle("active");
-    tab.classList.toggle('active');
-    // document.body.classList.toggle("menu-open");
-})
-
-navlinks.forEach(link =>{
-    link.addEventListener('click',()=>{
-        burger.classList.remove("active");
-        tab.classList.remove('active');
-    })
-})
+ 
+//  burger.addEventListener('click',()=>{
+//     burger.classList.remove('active');
+//     mobile.classList.remove('active');
+//  })
