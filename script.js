@@ -1,114 +1,151 @@
-const slider = document.querySelector('.service-container');
+const track = document.querySelectorAll('.product-container');
+const next = document.querySelector('.next');
+const prev = document.querySelector('.prev');
 
-let isDown = false;
-let startX =0;
-let scrollLeft =0;
-let velocity = 0;
-let rafId = null;
+const test_track = document.querySelector(".testimonial-track");
+const slides = document.querySelectorAll(".testimonial-container");
+const nextBtn = document.querySelector(".test-next");
+const prevBtn = document.querySelector(".test-prev");
+const slider = document.querySelector(".testimonial-slider");
 
-function startDrag(e) {
-    isDown = true;
-    slider.classList.add('active');           // visual feedback (cursor: grabbing usually)
+
+let index = 0 ;
+const totalSlides = slides.length
+
+const showSlide = (i) =>{
+    slides.forEach(slide =>{
+        slide.classList.remove("active");
+    });
     
-    // Support both mouse and touch
-    const pageX = e.pageX || e.touches?.[0]?.pageX;
-    startX = pageX - slider.offsetLeft;
-    scrollLeft = slider.scrollLeft;
-
-    // Cancel any ongoing momentum
-    cancelAnimationFrame(rafId);
-    velocity = 0;
-}
-function stopDrag() {
-    if (!isDown) return;
-    isDown = false;
-    slider.classList.remove('active');
-
-    // Optional: add a little momentum/inertia
-    // (uncomment if you want smooth flick feel)
-    // if (Math.abs(velocity) > 0.5) {
-    //     function momentum() {
-    //         slider.scrollLeft -= velocity;
-    //         velocity *= 0.95; // friction
-    //         if (Math.abs(velocity) > 0.5) {
-    //             rafId = requestAnimationFrame(momentum);
-    //         }
-    //     }
-    //     rafId = requestAnimationFrame(momentum);
-    // }
-}
-
-function drag(e) {
-    if (!isDown) return;
-    const pageX = e.pageX || e.touches?.[0]?.pageX;
-    const pageY = e.pageY || e.touches?.[0]?.pageY;
-
-    const x = pageX - slider.offsetLeft;
-    const walk = (x - startX) * 1.8;
-
-    // Only prevent default if horizontal movement is bigger than vertical
-    const moveX = Math.abs(pageX - startX);
-    const moveY = Math.abs(pageY - startX);
-
-    if (moveX > moveY) {
-        e.preventDefault(); // only block when dragging sideways
-        slider.scrollLeft = scrollLeft - walk;
-    }
+    slides[i].classList.add("active");
 }
 
 
-
-slider.addEventListener('mousedown', startDrag);
-slider.addEventListener('mousemove', drag);
-slider.addEventListener('mouseup', stopDrag);
-slider.addEventListener('mouseleave', stopDrag);
-
-// Touch events (very important for mobile)
-slider.addEventListener('touchstart', startDrag, { passive: false });
-slider.addEventListener('touchmove', drag, { passive: false });
-slider.addEventListener('touchend', stopDrag);
-slider.addEventListener('touchcancel', stopDrag);
-
-
-
-
-const tabs = document.querySelectorAll('.tab');
-const sections = document.querySelectorAll('.pricing-section');
-
-tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-
-        // remove active from all
-        tabs.forEach(t => t.classList.remove('active'));
-        sections.forEach(s => s.classList.remove('active'));
-
-        // activate clicked
-        tab.classList.add('active');
-        sections[tab.dataset.tab].classList.add('active');
-    });
+nextBtn.addEventListener("click", () => {
+    index++;
+    if(index >= totalSlides) index = 0;
+    showSlide(index);
 });
 
-
- const burger = document.querySelector('.burger-menu');
- const mobile = document.getElementById('mobile-links');
- const navLinks = document.querySelectorAll('.mobile-nav .nav-links a');
- const navMenu = document.querySelector('.mobile-nav .nav-links');
-
- burger.addEventListener('click',()=>{
-    burger.classList.toggle('active');
-    mobile.classList.toggle('active');
- })
-
-
- navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        navMenu.classList.remove('active'); // close menu
-        burger.classList.remove('active');  // reset burger icon
-    });
+prevBtn.addEventListener("click", () => {
+    index--;
+    if(index < 0) index = totalSlides - 1;
+    showSlide(index);
 });
 
+let autoSlide = setInterval(() => {
+    index++;
+    if(index >= totalSlides) index = 0;
+    showSlide(index);
+}, 5000);
+
+
+
+
+
+
+
+
+// slider
+
+const imgslider = document.getElementById("image-slider");
  
-//  burger.addEventListener('click',()=>{
-//     burger.classList.remove('active');
-//     mobile.classList.remove('active');
-//  })
+let isDown = false;
+let startX ;
+let scrollLeft ;
+
+imgslider.addEventListener("mousedown", (e)=>{
+    isDown = true;
+    startX = e.pageX - imgslider.offsetLeft;
+    scrollLeft = imgslider.scrollLeft;
+    imgslider.style.cursor = 'grabbing'
+});
+
+imgslider.addEventListener('mouseleave', () => {
+    isDown = false;
+    imgslider.style.cursor = 'grab';
+  });
+
+  imgslider.addEventListener('mouseup', () => {
+    isDown = false;
+    imgslider.style.cursor = 'grab';
+  });
+
+  imgslider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - imgslider.offsetLeft;
+    const walk = (x - startX) * 1.6; // scroll speed → higher = faster
+    imgslider.scrollLeft = scrollLeft - walk;
+  });
+
+
+  imgslider.addEventListener('touchstart', (e) => {
+    isDown = true;
+    startX = e.touches[0].pageX - imgslider.offsetLeft;
+    scrollLeft = imgslider.scrollLeft;
+  });
+
+  imgslider.addEventListener('touchend', () => {
+    isDown = false;
+  });
+
+  imgslider.addEventListener('touchmove', (e) => {
+    if (!isDown) return;
+    const x = e.touches[0].pageX - imgslider.offsetLeft;
+    const walk = (x - startX) * 1.6;
+    imgslider.scrollLeft = scrollLeft - walk;
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+// mobile nav
+
+const burger = document.querySelector('.burger-menu');
+const tab = document.querySelector('.mobile');
+const navlinks = document.querySelectorAll('.mobile-links a')
+
+burger.addEventListener("click" ,() =>{
+    burger.classList.toggle("active");
+    tab.classList.toggle('active');
+    // document.body.classList.toggle("menu-open");
+})
+
+navlinks.forEach(link =>{
+    link.addEventListener('click',()=>{
+        burger.classList.remove("active");
+        tab.classList.remove('active');
+    })
+})
+
+
+
+const images = document.querySelectorAll('.img-container img');
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+        }
+    });
+}, {
+    threshold: 0.3
+});
+
+images.forEach(img => {
+    observer.observe(img);
+});
+
+
+
+
